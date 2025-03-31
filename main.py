@@ -1,10 +1,26 @@
 from imports import *
 
+def wrap_text(text, max_width, canvas, font_name='Helvetica', font_size=12):
+    words = text.split(' ')
+    lines = []
+    current_line = ""
+
+    for word in words:
+        if canvas.stringWidth(current_line + " " + word, font_name, font_size) <= max_width:
+            current_line += " " + word
+        else:
+            lines.append(current_line.strip())
+            current_line = word
+    lines.append(current_line.strip())
+    return lines
+
 def gerar_recibo_pdf(nome_pagador, cpf_pagador, valor, valor_extenso, descricao, forma_pagamento, data, nome_recebedor, cpf_recebedor, arquivo_saida):
     c = canvas.Canvas(arquivo_saida, pagesize=A4)
     width, height = A4
     margem_esquerda = 50
+    margem_direita = 50
     linha_atual = height - 70
+    max_width = width - margem_esquerda - margem_direita
 
     # 🎨 Inserir logotipo
     caminho_logo = "logo.png"  # ou "logo.jpg", ou path absoluto
@@ -23,31 +39,42 @@ def gerar_recibo_pdf(nome_pagador, cpf_pagador, valor, valor_extenso, descricao,
     linha_atual -= 40
     c.setFont("Helvetica-Bold", 20)
     c.drawCentredString(width / 2, linha_atual, "RECIBO DE PAGAMENTO")
-    c.line(margem_esquerda, linha_atual - 10, width - margem_esquerda, linha_atual - 10)
+    c.line(margem_esquerda, linha_atual - 10, width - margem_direita, linha_atual - 10)
 
     linha_atual -= 60
     c.setFont("Helvetica", 12)
 
-    c.drawString(margem_esquerda, linha_atual, f"Recebi de: {nome_pagador}")
+    # Função auxiliar para desenhar texto em negrito
+    def desenhar_texto_negrito(label, texto, y):
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(margem_esquerda, y, label)
+        c.setFont("Helvetica", 12)
+        
+        wrapped_text = wrap_text(texto, max_width - 150, c)
+        for i, line in enumerate(wrapped_text):
+            c.drawString(margem_esquerda + 150, y - (i * 14), line)
+        return y - (len(wrapped_text) * 14)
+
+    linha_atual = desenhar_texto_negrito("Recebi de:", nome_pagador, linha_atual)
     linha_atual -= 20
-    c.drawString(margem_esquerda, linha_atual, f"CPF/CNPJ do pagador: {cpf_pagador}")
+    linha_atual = desenhar_texto_negrito("CPF/CNPJ do pagador:", cpf_pagador, linha_atual)
 
     linha_atual -= 30
-    c.drawString(margem_esquerda, linha_atual, f"A quantia de R$ {valor} ({valor_extenso.capitalize()}).")
+    linha_atual = desenhar_texto_negrito("A quantia de R$:", f"{valor} ({valor_extenso.capitalize()})", linha_atual)
 
     linha_atual -= 30
-    c.drawString(margem_esquerda, linha_atual, f"Referente a: {descricao}")
+    linha_atual = desenhar_texto_negrito("Referente a:", descricao, linha_atual)
 
     linha_atual -= 20
-    c.drawString(margem_esquerda, linha_atual, f"Forma de pagamento: {forma_pagamento}")
+    linha_atual = desenhar_texto_negrito("Forma de pagamento:", forma_pagamento, linha_atual)
 
     linha_atual -= 30
-    c.drawString(margem_esquerda, linha_atual, f"Data do pagamento: {data}")
+    linha_atual = desenhar_texto_negrito("Data do pagamento:", data, linha_atual)
 
     linha_atual -= 80
     c.line(margem_esquerda, linha_atual, margem_esquerda + 250, linha_atual)
     linha_atual -= 15
-    c.drawString(margem_esquerda, linha_atual, f"Assinatura do recebedor")
+    c.drawString(margem_esquerda, linha_atual, "Assinatura do recebedor")
 
     linha_atual -= 40
     c.setFont("Helvetica-Oblique", 11)
@@ -59,7 +86,6 @@ def gerar_recibo_pdf(nome_pagador, cpf_pagador, valor, valor_extenso, descricao,
     c.drawCentredString(width / 2, 40, "Documento gerado automaticamente - válido com assinatura")
 
     c.save()
-
 
 def gerar_recibo():
     nome_pagador = entry_nome.get()

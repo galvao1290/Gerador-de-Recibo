@@ -22,8 +22,8 @@ def gerar_recibo_pdf(nome_pagador, cpf_pagador, valor, valor_extenso, descricao,
     linha_atual = height - 70
     max_width = width - margem_esquerda - margem_direita
 
-    # 🎨 Inserir logotipo
-    caminho_logo = "logo.png"  # ou "logo.jpg", ou path absoluto
+    # Inserir logotipo
+    caminho_logo = "logo.png" 
     if os.path.exists(caminho_logo):
         try:
             logo = ImageReader(caminho_logo)
@@ -33,9 +33,9 @@ def gerar_recibo_pdf(nome_pagador, cpf_pagador, valor, valor_extenso, descricao,
         except Exception as e:
             print(f"Erro ao inserir logotipo: {e}")
     else:
-        print("⚠️ Logotipo não encontrado - continuando sem logotipo.")
+        print("Logotipo não encontrado - continuando sem logotipo.")
 
-    # Ajuste na posição do título por causa do logo
+
     linha_atual -= 40
     c.setFont("Helvetica-Bold", 20)
     c.drawCentredString(width / 2, linha_atual, "RECIBO DE PAGAMENTO")
@@ -44,7 +44,7 @@ def gerar_recibo_pdf(nome_pagador, cpf_pagador, valor, valor_extenso, descricao,
     linha_atual -= 60
     c.setFont("Helvetica", 12)
 
-    # Função auxiliar para desenhar texto em negrito
+
     def desenhar_texto_negrito(label, texto, y):
         c.setFont("Helvetica-Bold", 12)
         c.drawString(margem_esquerda, y, label)
@@ -135,13 +135,13 @@ def gerar_recibo():
         messagebox.showerror("Erro", f"Erro ao gerar recibo:\n{e}")
 
 
-# Criação da janela
+
 janela = tk.Tk()
 janela.title("Gerador de Recibo PDF")
 janela.geometry("400x450")
 janela.resizable(False, False)
 
-# Estilo simples
+
 tk.Label(janela, text="Nome do Pagador:").pack(pady=5)
 entry_nome = tk.Entry(janela, width=50)
 entry_nome.pack()
@@ -162,7 +162,6 @@ tk.Label(janela, text="Forma de Pagamento:").pack(pady=5)
 entry_forma = tk.Entry(janela, width=30)
 entry_forma.pack()
 
-# Botão para gerar
 tk.Button(janela, text="Gerar Recibo", width=30, bg='#4CAF50', fg='white', command=gerar_recibo).pack(pady=30)
 
 janela.mainloop()
